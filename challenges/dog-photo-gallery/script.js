@@ -1,20 +1,28 @@
-let paragraph = document.getElementById("element");
-let button = document.querySelector(".btn");
-function onClick(event){
-    fetch("https://dog.ceo/api/breeds/image/random")
-        .then(function (response) {
-            return response.json();
+function getDogUrl(){
+    const apiURL = 'https://dog.ceo/api/breeds/image/random';
+    return fetch(apiURL)
+        .then((response) => response.json())
+        .then((jsonResponse) => {
+            if(jsonResponse.code === 404) return Promise.reject("No dog found")
+            else return jsonResponse.message;
+        });
+}
 
-        })
-        .then(function (data) {
-            console.log(data)
-            let list = document.querySelector(".list")
-            let listItem = document.createElement("li")
-            let img = document.createElement("img");
-            img.src = data.message;
-            list.appendChild(listItem);
-            listItem.appendChild(img)   
-        })
-        .catch((error) => console.log("Image not found"))
-};
-button.addEventListener("click",onClick)
+function addDogToList(dogURL) {
+    const list = document.querySelector("ul");
+    const listElement = document.createElement("li");
+    const image = document.createElement("img");
+    image.src = dogURL;
+    list.appendChild(listElement);
+    listElement.appendChild(image)
+}
+const button = document.querySelector(".btn")
+
+button.addEventListener("click", (e) => {
+    getDogUrl()
+        .then((dogURL) => addDogToList(dogURL))
+        .catch((error) => {
+            const dog404Placeholder = './dog-placeholder.jpg';
+            addDogToList(dog404Placeholder);
+        });
+});
